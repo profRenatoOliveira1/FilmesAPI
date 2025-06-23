@@ -28,6 +28,7 @@ namespace FilmesAPI.Controllers {
         /// </summary>
         /// <param name="id">ID do filme/série</param>
         /// <returns>Informações sobre o filme/série correspondente ao ID</returns>
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<Filme>> Get(int id) {
             var filme = await _context.Filmes.FindAsync(id);
@@ -39,6 +40,7 @@ namespace FilmesAPI.Controllers {
         /// </summary>
         /// <param name="filme">Objeto com as informações do filme/série</param>
         /// <returns>Filme/Série cadastrada no sistema</returns>
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Filme>> Post(Filme filme) {
             _context.Filmes.Add(filme);
@@ -52,6 +54,7 @@ namespace FilmesAPI.Controllers {
         /// <param name="id">ID do filme/série</param>
         /// <param name="filme">Objeto com as informações do filme/série</param>
         /// <returns></returns>
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Filme filme) {
             if (id != filme.Id) return BadRequest();
@@ -65,6 +68,7 @@ namespace FilmesAPI.Controllers {
         /// </summary>
         /// <param name="id">ID do filme/série a ser removido</param>
         /// <returns></returns>
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id) {
             var filme = await _context.Filmes.FindAsync(id);
@@ -79,6 +83,7 @@ namespace FilmesAPI.Controllers {
         /// </summary>
         /// <param name="filmes">Array de objetos de filmes/séries</param>
         /// <returns>Mensagem de sucesso</returns>
+        [Authorize]
         [HttpPost("lote")]
         public async Task<ActionResult> PostEmLote(List<Filme> filmes) {
             foreach (var filme in filmes) {
