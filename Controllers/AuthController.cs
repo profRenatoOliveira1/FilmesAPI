@@ -3,11 +3,18 @@ using System.Security.Claims;
 using System.Text;
 using FilmesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase {
+    private readonly IConfiguration _configuration;
+
+    public AuthController(IConfiguration configuration) {
+        _configuration = configuration;
+    }
+
     [HttpPost("login")]
     public IActionResult Login([FromBody] Usuario usuario) {
         if (usuario.Email != "admin@cinelog.com" || usuario.Senha != "admin123") {
@@ -19,7 +26,7 @@ public class AuthController : ControllerBase {
             new Claim(ClaimTypes.Name, usuario.Email)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("UmAnelParaGovernar_Todos_123!EncontralosComSeguranca"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("SecretKey")));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(

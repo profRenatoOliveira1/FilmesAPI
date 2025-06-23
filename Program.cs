@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Configura o contexto do banco de dados PostgreSQL
@@ -29,16 +28,41 @@ builder.Services.AddSwaggerGen(c => {
         }
     });
 
-    // Inclui os comentários XML na documentação do Swagger
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 
-    // Filtro inline para adicionar servidores
-    //c.DocumentFilter<AddServersFilter>();
+    // Esquema de segurança com tipo HTTP e esquema bearer
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+        Description = "Insira apenas o token JWT. O prefixo 'Bearer' será adicionado automaticamente.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
-var secretKey = Encoding.UTF8.GetBytes("UmAnelParaGovernar_Todos_123!EncontralosComSeguranca");
+var secret = builder.Configuration.GetValue<string>("SecretKey");
+if (string.IsNullOrWhiteSpace(secret))
+    throw new InvalidOperationException("A chave JwtSecret não foi encontrada no appsettings.json.");
+
+var secretKey = Encoding.UTF8.GetBytes(secret);
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options => {
         options.TokenValidationParameters = new TokenValidationParameters {
